@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+  </head>
+  <body>
+    user_id: <input id="user_id" type="text" />
+    <br />
+    room_id: <input id="room_id" type="text" /> <button id="joinBtn">join room</button>
+
+    <div id="send_msg" style="display: none;">
+      message: <input id="msg" /> <button id="sendBtn">send message</button><br />
+      <button id="ready">I'm ready!</button>
+    </div>
+    <ul id="log">
+    </ul>
+  </body>
+  <script>
+    $(function () {
+      // websocket URL
+      const wsUrl = 'http://localhost:2434';
+      const socket = io(wsUrl);
+
+      let user_id;
+      let room_id;
+      
+      // create connection
+      socket.on('connect', () => {
+        console.log('connected!');
+      });
+
+      // 
+      socket.on('message', msg => {
+        $('#log').prepend(`<li>${msg}</li>`);
+      });
+
+      socket.on('ready', data => {
+        if(data.user_id != user_id) {
+          alert(`${data.user_id} is ready!`);
+        }
+      });
+
+      $('#joinBtn').click(() => {
+        user_id = $('#user_id').val();
+        room_id = $('#room_id').val();
+        socket.emit('enter_room', {
+          user_id,
+          room_id
+        });
+        $('#send_msg').show();
+      });
+
+      $('#sendBtn').click(() => {
+        const msg = $('#msg').val();
+        socket.emit('message', {
+          user_id,
+          room_id,
+          msg
+        });
+      });
+
+      $('#ready').click(() => {
+        const msg = `${user_id} is ready for game!`;
+        socket.emit('ready', {
+          user_id,
+          room_id,
+          msg
+        });
+      });
+    });
+  </script>
+</html>
