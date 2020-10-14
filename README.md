@@ -7,4 +7,4 @@
 ```npm install```
 
 ## Start Service
-```node index.js```
+```node server.js```
